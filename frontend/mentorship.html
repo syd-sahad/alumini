@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Mentorship | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .request-page {
+            width: calc(100% - 32px);
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 30px;
+            background: var(--white);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .request-page h1,
+        .request-page > p {
+            text-align: center;
+        }
+
+        .request-page > p {
+            margin: 8px 0 24px;
+            color: var(--muted);
+        }
+
+        .request-form {
+            display: grid;
+            gap: 10px;
+        }
+
+        .request-form label {
+            margin-top: 8px;
+            font-weight: 700;
+        }
+
+        .request-form select,
+        .request-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        .request-form textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .request-form button,
+        .back-button {
+            display: inline-block;
+            width: fit-content;
+            margin-top: 10px;
+            padding: 12px 20px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .request-form button:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        #requestMessage {
+            min-height: 24px;
+            margin: 8px 0;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 520px) {
+            .request-page {
+                margin: 20px auto;
+                padding: 22px 18px;
+            }
+
+            .request-form button,
+            .back-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="request-page">
+        <h1>Request Mentorship</h1>
+        <p>Choose an alumnus and explain what guidance you are looking for.</p>
+
+        <form id="mentorshipForm" class="request-form">
+            <label for="alumniId">Alumnus</label>
+            <select id="alumniId" required disabled>
+                <option value="">Loading alumni...</option>
+            </select>
+
+            <label for="description">Why are you requesting mentorship?</label>
+            <textarea
+                id="description"
+                maxlength="2000"
+                required
+                placeholder="Describe the guidance or career advice you are looking for (up to 2000 characters)."
+            ></textarea>
+
+            <button id="submitRequest" type="submit" disabled>Send Request</button>
+            <p id="requestMessage" role="status" aria-live="polite"></p>
+        </form>
+
+        <p><a class="back-button" href="dashboard.html">Back to Dashboard</a></p>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        const sessionText = sessionStorage.getItem("alumniConnectStudent");
+        let studentSession;
+
+        try {
+            studentSession = JSON.parse(sessionText || "null");
+        } catch (error) {
+            studentSession = null;
+        }
+
+        if (!studentSession?.token) {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.replace("login.html");
+        }
+
+        const alumniSelect = document.getElementById("alumniId");
+        const requestForm = document.getElementById("mentorshipForm");
+        const message = document.getElementById("requestMessage");
+        const submitButton = document.getElementById("submitRequest");
+
+        async function loadAlumniOptions() {
+            try {
+                const response = await fetch(`${API_BASE}/alumni`);
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Unable to load alumni.");
+                }
+
+                alumniSelect.replaceChildren();
+                const placeholder = document.createElement("option");
+                placeholder.value = "";
+                placeholder.textContent = result.alumni.length
+                    ? "Select an alumnus"
+                    : "No alumni are available";
+                alumniSelect.appendChild(placeholder);
+
+                result.alumni.forEach(alumnus => {
+                    const option = document.createElement("option");
+                    option.value = String(alumnus.alumniId);
+                    option.textContent = [
+                        alumnus.name,
+                        alumnus.company || "Company not provided",
+                        alumnus.jobRole || "Role not provided"
+                    ].join(" — ");
+                    alumniSelect.appendChild(option);
+                });
+
+                alumniSelect.disabled = result.alumni.length === 0;
+                submitButton.disabled = result.alumni.length === 0;
+                if (!result.alumni.length) {
+                    message.textContent = "No alumni are currently available to request.";
+                }
+            } catch (error) {
+                console.error("Alumni loading error:", error);
+                alumniSelect.replaceChildren();
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Unable to load alumni";
+                alumniSelect.appendChild(option);
+                message.style.color = "#b91c1c";
+                message.textContent = "Could not load alumni. Check the backend connection and try again.";
+            }
+        }
+
+        requestForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            message.style.color = "#b91c1c";
+            message.textContent = "";
+
+            const description = document.getElementById("description").value.trim();
+            if (!alumniSelect.value || !description || description.length > 2000) {
+                message.textContent = "Select an alumnus and enter a message of 1 to 2000 characters.";
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Sending...";
+            try {
+                const response = await fetch(`${API_BASE}/mentorship-requests`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${studentSession.token}`
+                    },
+                    body: JSON.stringify({
+                        alumniId: Number(alumniSelect.value),
+                        description
+                    })
+                });
+                const result = await response.json();
+
+                if (response.status === 401) {
+                    sessionStorage.removeItem("alumniConnectStudent");
+                    window.location.replace("login.html");
+                    return;
+                }
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Unable to send request.");
+                }
+
+                message.style.color = "#15803d";
+                message.textContent = `${result.message} Status: ${result.status}.`;
+                requestForm.reset();
+            } catch (error) {
+                console.error("Mentorship request error:", error);
+                message.style.color = "#b91c1c";
+                message.textContent = error instanceof TypeError
+                    ? "Could not connect to the backend. Please try again."
+                    : error.message;
+            } finally {
+                submitButton.disabled = !alumniSelect.options.length ||
+                    alumniSelect.options.length < 2;
+                submitButton.textContent = "Send Request";
+            }
+        });
+
+        window.addEventListener("pagehide", () => {
+            requestForm.reset();
+            message.textContent = "";
+            submitButton.disabled = alumniSelect.options.length < 2;
+            submitButton.textContent = "Send Request";
+        });
+
+        window.addEventListener("pageshow", event => {
+            if (event.persisted) {
+                requestForm.reset();
+                message.textContent = "";
+                submitButton.disabled = alumniSelect.options.length < 2;
+                submitButton.textContent = "Send Request";
+            }
+        });
+
+        if (studentSession?.token) {
+            loadAlumniOptions();
+        }
+    </script>
+</body>
+</html>

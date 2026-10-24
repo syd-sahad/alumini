@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Login | AlumniConnect</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .login-container {
+            width: calc(100% - 30px);
+            max-width: 450px;
+            margin: 50px auto;
+            padding: 35px;
+            box-sizing: border-box;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            color: #173b73;
+            margin-bottom: 10px;
+            font-size: 30px;
+        }
+
+        .login-container > p {
+            text-align: center;
+            color: #64748b;
+            margin: 0 0 25px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px;
+            border: 1px solid #d5dce5;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2864c5;
+            box-shadow: 0 0 0 3px rgba(40, 100, 197, 0.12);
+        }
+
+        .login-button {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #2864c5;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-button:hover {
+            background: #174b9b;
+        }
+
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #message {
+            margin: 15px 0 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+
+        .register-link,
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #2864c5;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .register-link:hover,
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .login-container {
+                margin: 25px auto;
+                padding: 25px 20px;
+            }
+
+            .login-container h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="login-container">
+
+        <h1>Welcome Back!</h1>
+
+        <p>Sign in to your AlumniConnect account.</p>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+                <label for="email">College Email *</label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your registered email"
+                    maxlength="150"
+                    autocomplete="email"
+                    oninput="this.value = this.value.toLowerCase()"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your 8-character password"
+                    minlength="8"
+                    maxlength="8"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                Login
+            </button>
+
+            <!-- Must match the message ID used by script.js -->
+            <p
+                id="message"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+        </form>
+
+        <a href="register.html" class="register-link">
+            Don't have an account? Register here
+        </a>
+
+        <a href="alumni-login.html" class="register-link">
+            Alumni? Sign in here
+        </a>
+
+        <a href="index.html" class="back-link">
+            &larr; Back to Home
+        </a>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

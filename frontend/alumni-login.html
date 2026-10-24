@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#eff6ff">
+    <title>Alumni Login | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="alumni-login-page">
+    <main class="alumni-login-shell">
+        <a class="alumni-login-brand" href="index.html" aria-label="AlumniConnect home">
+            <span class="alumni-login-brand-mark" aria-hidden="true">AC</span>
+            <span>Alumni<span class="alumni-login-brand-accent">Connect</span></span>
+        </a>
+
+        <section class="alumni-login-card" aria-labelledby="alumniLoginTitle">
+            <p class="alumni-login-eyebrow">ALUMNI PORTAL</p>
+            <h1 id="alumniLoginTitle">Welcome back</h1>
+            <p class="alumni-login-intro">
+                Sign in with your registered email to connect with the next generation.
+            </p>
+
+            <form id="alumniLoginForm" novalidate>
+                <div class="alumni-login-field">
+                    <label for="alumniEmail">Registered email</label>
+                    <input
+                        id="alumniEmail"
+                        name="email"
+                        type="email"
+                        maxlength="150"
+                        autocomplete="username"
+                        placeholder="you@example.com"
+                        required
+                    >
+                </div>
+
+                <div class="alumni-login-field">
+                    <label for="alumniPassword">Password</label>
+                    <div class="alumni-login-password">
+                        <input
+                            id="alumniPassword"
+                            name="password"
+                            type="password"
+                            maxlength="30"
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <button
+                            id="alumniPasswordToggle"
+                            class="alumni-login-password-toggle"
+                            type="button"
+                            aria-controls="alumniPassword"
+                            aria-pressed="false"
+                        >Show</button>
+                    </div>
+                </div>
+
+                <button class="alumni-login-submit" type="submit">Sign in</button>
+                <p
+                    id="alumniLoginMessage"
+                    class="alumni-login-message"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                ></p>
+            </form>
+
+            <nav class="alumni-login-links" aria-label="Other pages">
+                <a href="login.html">Student Login</a>
+                <a href="index.html">Home</a>
+            </nav>
+        </section>
+
+        <p class="alumni-login-footer">A community built on shared experience.</p>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Events | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .events-page {
+            width: calc(100% - 32px);
+            max-width: 1050px;
+            margin: 40px auto;
+        }
+
+        .events-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .events-header p {
+            margin-top: 8px;
+            color: var(--muted);
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .event-card {
+            padding: 22px;
+            background: var(--white);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+            overflow-wrap: anywhere;
+        }
+
+        .event-card h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .event-card p {
+            margin-top: 8px;
+            color: #475569;
+            white-space: pre-wrap;
+        }
+
+        #eventsStatus {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .back-button {
+            display: block;
+            width: fit-content;
+            margin: 28px auto;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <main class="events-page">
+        <header class="events-header">
+            <h1>Alumni Events</h1>
+            <p>Explore events listed by the AlumniConnect network.</p>
+        </header>
+        <p id="eventsStatus" role="status" aria-live="polite">Loading events...</p>
+        <section id="eventsGrid" class="events-grid" aria-label="Alumni events"></section>
+        <a class="back-button" href="dashboard.html">Back to Dashboard</a>
+    </main>
+
+    <script>
+        async function loadEvents() {
+            const status = document.getElementById("eventsStatus");
+            const grid = document.getElementById("eventsGrid");
+
+            try {
+                const response = await fetch("http://localhost:5000/api/events");
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Unable to load events.");
+                }
+
+                if (!result.events.length) {
+                    status.textContent = "No events are currently scheduled.";
+                    return;
+                }
+
+                status.textContent = `${result.count} event${result.count === 1 ? "" : "s"}`;
+                result.events.forEach(event => {
+                    const card = document.createElement("article");
+                    card.className = "event-card";
+
+                    const heading = document.createElement("h2");
+                    heading.textContent = event.eventName || "Event";
+                    card.appendChild(heading);
+
+                    [
+                        ["Description", event.description],
+                        ["Date", event.date
+                            ? new Date(`${String(event.date).slice(0, 10)}T00:00:00`).toLocaleDateString()
+                            : null],
+                        ["Time", event.time],
+                        ["Location", event.location]
+                    ].forEach(([label, value]) => {
+                        const paragraph = document.createElement("p");
+                        const strong = document.createElement("strong");
+                        strong.textContent = `${label}: `;
+                        paragraph.appendChild(strong);
+                        paragraph.appendChild(document.createTextNode(value || "Not provided"));
+                        card.appendChild(paragraph);
+                    });
+
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Events loading error:", error);
+                status.textContent = error instanceof TypeError
+                    ? "Could not connect to the backend. Please try again."
+                    : error.message;
+            }
+        }
+
+        loadEvents();
+    </script>
+</body>
+</html>

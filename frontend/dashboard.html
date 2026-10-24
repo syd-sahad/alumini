@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard | AlumniConnect</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            background: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1100px;
+            width: 92%;
+            margin: 35px auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+        }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            color: #0f172a;
+        }
+
+        .dashboard-header p {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .welcome-card {
+            margin-top: 25px;
+            padding: 35px;
+            border-radius: 18px;
+            color: white;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+        }
+
+        .welcome-card h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-card p {
+            color: #dbeafe;
+        }
+
+        .dashboard-section-title {
+            margin: 35px 0 20px;
+            font-size: 23px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 5px 15px rgba(15, 23, 42, 0.03);
+            transition: 0.2s;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+        }
+
+        .dashboard-card .icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card p {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 18px;
+        }
+
+        .card-link {
+            display: inline-block;
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .profile-card {
+            margin-top: 25px;
+            padding: 25px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+        }
+
+        .profile-card h3 {
+            margin-bottom: 15px;
+        }
+
+        .profile-detail {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-detail:last-child {
+            border-bottom: none;
+        }
+
+        .profile-detail strong {
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .dashboard-feed {
+            margin-top: 32px;
+        }
+
+        .dashboard-feed h2 {
+            margin-bottom: 16px;
+            font-size: 23px;
+        }
+
+        .feed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .feed-card {
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .feed-card h3 {
+            margin-bottom: 8px;
+            font-size: 17px;
+        }
+
+        .feed-card p {
+            margin-top: 7px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .feed-status {
+            margin: 12px 0;
+            color: #64748b;
+        }
+
+        .dashboard-footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            padding: 30px 0;
+        }
+
+        @media (max-width: 800px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 520px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-card {
+                padding: 25px;
+            }
+
+            .welcome-card h2 {
+                font-size: 24px;
+            }
+
+            .dashboard-header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="dashboard">
+
+        <header class="dashboard-header">
+            <div>
+                <h1>AlumniConnect</h1>
+                <p>Student Dashboard</p>
+            </div>
+
+            <button class="logout-btn" id="logoutBtn">
+                Logout
+            </button>
+        </header>
+
+        <section class="welcome-card">
+            <h2>Welcome, <span id="studentName">Student</span>! 👋</h2>
+            <p>
+                Connect with alumni, discover career opportunities,
+                and find your perfect mentor.
+            </p>
+        </section>
+
+        <h2 class="dashboard-section-title">Your Dashboard</h2>
+
+        <section class="dashboard-grid">
+
+            <article class="dashboard-card">
+                <div class="icon">👤</div>
+                <h3>My Profile</h3>
+                <p>View your registered student information.</p>
+                <a href="#profile" class="card-link">View Profile →</a>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="icon">🎓</div>
+                <h3>Find Alumni</h3>
+                <p>Discover graduates, their skills, and careers.</p>
+                <a href="alumni.html" class="card-link">Explore Alumni →</a>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="icon">🤝</div>
+                <h3>Send Mentorship Request</h3>
+                <p>Choose an alumnus and ask for career guidance.</p>
+                <a href="mentorship.html" class="card-link">Request Mentorship →</a>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="icon">📩</div>
+                <h3>My Requests</h3>
+                <p>Keep track of the status of your requests.</p>
+                <a href="requests.html" class="card-link">View Requests →</a>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="icon">📅</div>
+                <h3>Alumni Events</h3>
+                <p>Discover upcoming alumni events and activities.</p>
+                <a href="events.html" class="card-link">View Events →</a>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="icon">📢</div>
+                <h3>Announcements</h3>
+                <p id="announcementSummary">Loading announcements...</p>
+            </article>
+
+        </section>
+
+        <section class="dashboard-feed" aria-labelledby="alumniPreviewTitle">
+            <h2 id="alumniPreviewTitle">Alumni Directory</h2>
+            <p id="alumniFeedStatus" class="feed-status" role="status">Loading alumni...</p>
+            <div id="alumniFeed" class="feed-grid"></div>
+            <p><a href="alumni.html" class="card-link">Browse and search all alumni →</a></p>
+        </section>
+
+        <section class="dashboard-feed" aria-labelledby="eventsPreviewTitle">
+            <h2 id="eventsPreviewTitle">Upcoming Alumni Events</h2>
+            <p id="eventsFeedStatus" class="feed-status" role="status">Loading events...</p>
+            <div id="eventsFeed" class="feed-grid"></div>
+            <p><a href="events.html" class="card-link">View all events →</a></p>
+        </section>
+
+        <section class="dashboard-feed" aria-labelledby="announcementsTitle">
+            <h2 id="announcementsTitle">Announcements</h2>
+            <p id="announcementStatus" class="feed-status" role="status">Loading announcements...</p>
+            <div id="announcementFeed" class="feed-grid"></div>
+        </section>
+
+        <section class="profile-card" id="profile">
+    <h3>👤 My Student Profile</h3>
+
+    <div class="profile-detail">
+        <strong>Student ID:</strong>
+        <span id="studentId">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Full Name:</strong>
+        <span id="profileName">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Email:</strong>
+        <span id="profileEmail">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Phone:</strong>
+        <span id="profilePhone">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Department:</strong>
+        <span id="profileDepartment">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Current Year:</strong>
+        <span id="profileYear">Loading...</span>
+    </div>
+
+    <div class="profile-detail">
+        <strong>Career Interests:</strong>
+        <span id="profileInterests">Loading...</span>
+    </div>
+</section>
+
+        <section class="profile-card" id="requests">
+            <h3>📩 My Mentorship Requests</h3>
+            <p><a class="card-link" href="requests.html">Open request tracking →</a></p>
+        </section>
+
+        <footer class="dashboard-footer">
+            © 2026 AlumniConnect | Connecting Students and Alumni
+        </footer>
+
+    </main>
+
+    <script>
+    async function loadStudentDashboard() {
+        const storedStudent = sessionStorage.getItem("alumniConnectStudent");
+
+        if (!storedStudent) {
+            window.location.replace("login.html");
+            return;
+        }
+
+        let student;
+
+        try {
+            student = JSON.parse(storedStudent);
+        } catch (error) {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.replace("login.html");
+            return;
+        }
+
+        if (!student.studentId) {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.replace("login.html");
+            return;
+        }
+
+        if (!student.token) {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.replace("login.html");
+            return;
+        }
+
+        loadDashboardAlumni();
+        loadDashboardEvents();
+        loadDashboardAnnouncements();
+
+        // Display basic details immediately
+        document.getElementById("studentName").textContent =
+            student.name || "Student";
+
+        document.getElementById("studentId").textContent =
+            student.studentId;
+
+        document.getElementById("profileName").textContent =
+            student.name || "Not available";
+
+        document.getElementById("profileEmail").textContent =
+            student.email || "Not available";
+
+        try {
+            const response = await fetch(
+                `http://localhost:5000/api/students/${encodeURIComponent(student.studentId)}`,
+                {
+                    headers: {
+                        "Authorization": `Bearer ${student.token}`
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to load profile.");
+            }
+
+            const profile = result.student;
+
+            document.getElementById("studentName").textContent =
+                profile.name || "Student";
+
+            document.getElementById("studentId").textContent =
+                profile.studentId ?? "Not available";
+
+            document.getElementById("profileName").textContent =
+                profile.name || "Not available";
+
+            document.getElementById("profileEmail").textContent =
+                profile.email || "Not available";
+
+            document.getElementById("profilePhone").textContent =
+                profile.phone || "Not provided";
+
+            document.getElementById("profileDepartment").textContent =
+                profile.department || "Not provided";
+
+            document.getElementById("profileYear").textContent =
+                profile.year ? `Year ${profile.year}` : "Not provided";
+
+            document.getElementById("profileInterests").textContent =
+                profile.careerInterests || "Not provided";
+
+        } catch (error) {
+            console.error("Profile loading error:", error);
+            document.getElementById("profilePhone").textContent =
+                "Unable to load profile";
+        }
+    }
+
+    async function loadDashboardAlumni() {
+        const status = document.getElementById("alumniFeedStatus");
+        const feed = document.getElementById("alumniFeed");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/alumni");
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to load alumni.");
+            }
+
+            if (!result.alumni.length) {
+                status.textContent = "No alumni are currently listed.";
+                return;
+            }
+
+            status.textContent = `${result.count} alumni available`;
+            result.alumni.slice(0, 3).forEach(person => {
+                const card = document.createElement("article");
+                card.className = "feed-card";
+
+                const heading = document.createElement("h3");
+                heading.textContent = person.name || "Name unavailable";
+                card.appendChild(heading);
+
+                [
+                    ["Department", person.department],
+                    ["Graduation year", person.graduationYear],
+                    ["Company", person.company],
+                    ["Job role", person.jobRole],
+                    ["Skills", person.skills]
+                ].forEach(([label, value]) => {
+                    const detail = document.createElement("p");
+                    detail.textContent = `${label}: ${value || "Not provided"}`;
+                    card.appendChild(detail);
+                });
+
+                feed.appendChild(card);
+            });
+        } catch (error) {
+            console.error("Dashboard alumni loading error:", error);
+            status.textContent = error instanceof TypeError
+                ? "Could not connect to the alumni service."
+                : error.message;
+        }
+    }
+
+    async function loadDashboardEvents() {
+        const status = document.getElementById("eventsFeedStatus");
+        const feed = document.getElementById("eventsFeed");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/events");
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to load events.");
+            }
+
+            if (!result.events.length) {
+                status.textContent = "No events are currently scheduled.";
+                return;
+            }
+
+            status.textContent = `${result.count} event${result.count === 1 ? "" : "s"} available`;
+            result.events.slice(0, 3).forEach(event => {
+                const card = document.createElement("article");
+                card.className = "feed-card";
+
+                const heading = document.createElement("h3");
+                heading.textContent = event.eventName || "Event";
+                card.appendChild(heading);
+
+                [
+                    ["Description", event.description],
+                    ["Date", event.date
+                        ? new Date(`${String(event.date).slice(0, 10)}T00:00:00`).toLocaleDateString()
+                        : null],
+                    ["Time", event.time],
+                    ["Location", event.location]
+                ].forEach(([label, value]) => {
+                    if (value) {
+                        const detail = document.createElement("p");
+                        detail.textContent = `${label}: ${value}`;
+                        card.appendChild(detail);
+                    }
+                });
+
+                feed.appendChild(card);
+            });
+        } catch (error) {
+            console.error("Dashboard event loading error:", error);
+            status.textContent = error instanceof TypeError
+                ? "Could not connect to the events service."
+                : error.message;
+        }
+    }
+
+    async function loadDashboardAnnouncements() {
+        const status = document.getElementById("announcementStatus");
+        const summary = document.getElementById("announcementSummary");
+        const feed = document.getElementById("announcementFeed");
+
+        try {
+            const response = await fetch("http://localhost:5000/api/announcements");
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Unable to load announcements.");
+            }
+
+            if (!result.announcements.length) {
+                status.textContent = "There are no announcements yet.";
+                summary.textContent = "No announcements yet.";
+                return;
+            }
+
+            const announcementCount = result.announcements.length;
+            status.textContent = `${announcementCount} announcement${announcementCount === 1 ? "" : "s"}`;
+            summary.textContent = `${announcementCount} announcement${announcementCount === 1 ? "" : "s"} available.`;
+
+            result.announcements.forEach(announcement => {
+                const card = document.createElement("article");
+                card.className = "feed-card";
+
+                const heading = document.createElement("h3");
+                heading.textContent = announcement.title || "Announcement";
+                card.appendChild(heading);
+
+                const message = document.createElement("p");
+                message.textContent = announcement.message || "No message provided.";
+                card.appendChild(message);
+
+                const createdAt = document.createElement("p");
+                createdAt.textContent = announcement.createdAt
+                    ? `Posted: ${new Date(announcement.createdAt).toLocaleString()}`
+                    : "Posted date not available";
+                card.appendChild(createdAt);
+
+                feed.appendChild(card);
+            });
+        } catch (error) {
+            console.error("Dashboard announcement loading error:", error);
+            const errorMessage = error instanceof TypeError
+                ? "Could not connect to the announcements service."
+                : error.message;
+            status.textContent = errorMessage;
+            summary.textContent = errorMessage;
+        }
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", function () {
+        let student;
+        try {
+            student = JSON.parse(
+                sessionStorage.getItem("alumniConnectStudent") || "null"
+            );
+        } catch (error) {
+            student = null;
+        }
+
+        const logout = student?.token
+            ? fetch("http://localhost:5000/api/students/logout", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${student.token}`
+                }
+            }).catch(error => console.error("Logout error:", error))
+            : Promise.resolve();
+
+        logout.finally(function () {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.href = "login.html";
+        });
+    });
+
+    loadStudentDashboard();
+</script>

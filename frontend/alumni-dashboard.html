@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Dashboard | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .alumni-dashboard {
+            width: calc(100% - 32px);
+            max-width: 1100px;
+            margin: 32px auto;
+        }
+
+        .alumni-header,
+        .alumni-profile,
+        .request-section,
+        .request-card {
+            padding: 22px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+        }
+
+        .alumni-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .alumni-header p,
+        .request-card p,
+        .alumni-profile p {
+            margin-top: 8px;
+            color: #64748b;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .alumni-header button,
+        .request-actions button,
+        .reply-form button {
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .alumni-header .logout-button {
+            background: #ef4444;
+        }
+
+        .alumni-profile,
+        .request-section {
+            margin-top: 22px;
+        }
+
+        .alumni-profile h2,
+        .request-section h2 {
+            margin-bottom: 12px;
+        }
+
+        .profile-heading,
+        .profile-form-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-heading {
+            justify-content: space-between;
+        }
+
+        .profile-heading button,
+        .profile-form-actions button {
+            padding: 10px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .profile-form-actions .cancel-button {
+            background: #64748b;
+        }
+
+        .profile-heading button:disabled,
+        .profile-form-actions button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .profile-edit-form {
+            display: grid;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .profile-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .profile-edit-form label {
+            display: grid;
+            gap: 6px;
+            font-weight: 700;
+        }
+
+        .profile-edit-form input,
+        .profile-edit-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        .profile-edit-form input[readonly] {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .profile-edit-form textarea {
+            min-height: 96px;
+            resize: vertical;
+        }
+
+        .profile-edit-message {
+            margin: 0;
+            color: #b91c1c;
+        }
+
+        .request-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .request-card h3 {
+            margin-bottom: 8px;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .request-actions .reject-button {
+            background: #dc2626;
+        }
+
+        .request-actions button:disabled,
+        .reply-form button:disabled,
+        .alumni-header button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .reply-form {
+            display: grid;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .reply-form label {
+            font-weight: 700;
+        }
+
+        .reply-form textarea {
+            width: 100%;
+            min-height: 90px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font: inherit;
+            resize: vertical;
+        }
+
+        .reply-form button {
+            width: fit-content;
+        }
+
+        .dashboard-status {
+            margin: 18px 0;
+            color: #64748b;
+        }
+
+        .empty-state {
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <main class="alumni-dashboard">
+        <header class="alumni-header">
+            <div>
+                <h1>AlumniConnect</h1>
+                <p>Alumni Dashboard — <span id="welcomeName">Loading...</span></p>
+            </div>
+            <button id="logoutButton" class="logout-button" type="button">Logout</button>
+        </header>
+
+        <p id="dashboardStatus" class="dashboard-status" role="status" aria-live="polite"></p>
+
+        <section class="alumni-profile">
+            <div class="profile-heading">
+                <h2>My Profile</h2>
+                <button id="profileEditButton" type="button" disabled>Edit Profile</button>
+            </div>
+            <div id="profileDetails"><p>Loading profile...</p></div>
+            <form id="profileEditForm" class="profile-edit-form" hidden>
+                <div class="profile-form-grid">
+                    <label>
+                        Alumni ID
+                        <input id="profileAlumniId" type="text" readonly>
+                    </label>
+                    <label>
+                        Email
+                        <input id="profileEmail" type="email" readonly>
+                    </label>
+                    <label>
+                        Department
+                        <input id="profileDepartment" type="text" readonly>
+                    </label>
+                    <label>
+                        Graduation year
+                        <input id="profileGraduationYear" type="text" readonly>
+                    </label>
+                    <label>
+                        Phone
+                        <input id="profilePhone" name="phone" type="tel" maxlength="15">
+                    </label>
+                    <label>
+                        Company
+                        <input id="profileCompany" name="company" type="text" maxlength="150">
+                    </label>
+                    <label>
+                        Job role
+                        <input id="profileJobRole" name="jobRole" type="text" maxlength="150">
+                    </label>
+                </div>
+                <label>
+                    Skills
+                    <textarea id="profileSkills" name="skills" maxlength="16000"></textarea>
+                </label>
+                <p id="profileEditMessage" class="profile-edit-message" role="status" aria-live="polite"></p>
+                <div class="profile-form-actions">
+                    <button type="submit">Save Changes</button>
+                    <button id="profileCancelButton" class="cancel-button" type="button">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <section id="pendingSection" class="request-section">
+            <h2>Pending Requests</h2>
+            <div id="pendingRequests" class="request-list"><p class="empty-state">Loading requests...</p></div>
+        </section>
+
+        <section id="acceptedSection" class="request-section">
+            <h2>Accepted Requests</h2>
+            <div id="acceptedRequests" class="request-list"><p class="empty-state">Loading requests...</p></div>
+        </section>
+
+        <section id="rejectedSection" class="request-section">
+            <h2>Rejected Requests</h2>
+            <div id="rejectedRequests" class="request-list"><p class="empty-state">Loading requests...</p></div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+        let alumniSession;
+        let currentAlumniProfile = null;
+
+        try {
+            alumniSession = JSON.parse(sessionStorage.getItem("alumniConnectAlumni") || "null");
+        } catch (error) {
+            alumniSession = null;
+        }
+
+        if (!alumniSession?.token) {
+            sessionStorage.removeItem("alumniConnectAlumni");
+            window.location.replace("alumni-login.html");
+        } else {
+            loadProfile();
+            loadRequests();
+        }
+
+        async function apiFetch(path, options = {}) {
+            const response = await fetch(`${API_BASE}${path}`, {
+                ...options,
+                headers: {
+                    "Accept": "application/json",
+                    ...(options.headers || {}),
+                    "Authorization": `Bearer ${alumniSession.token}`
+                }
+            });
+            const contentType = response.headers.get("content-type") || "";
+            if (!contentType.toLowerCase().includes("application/json")) {
+                throw new Error(
+                    `The backend returned a non-JSON response (HTTP ${response.status}) for ${path}. Check that the AlumniConnect backend is running at ${API_BASE}.`
+                );
+            }
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                console.error("Backend JSON response parsing error:", error);
+                throw new Error(
+                    `The backend returned invalid JSON (HTTP ${response.status}) for ${path}.`
+                );
+            }
+
+            if (response.status === 401) {
+                sessionStorage.removeItem("alumniConnectAlumni");
+                window.location.replace("alumni-login.html");
+                throw new Error("Your alumni session expired. Please log in again.");
+            }
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "The request could not be completed.");
+            }
+            return result;
+        }
+
+        async function loadProfile() {
+            const details = document.getElementById("profileDetails");
+            try {
+                const result = await apiFetch("/alumni/me");
+                const alumnus = result.alumnus;
+                currentAlumniProfile = alumnus;
+                document.getElementById("welcomeName").textContent = alumnus.name;
+                details.replaceChildren();
+                [
+                    ["Email", alumnus.email],
+                    ["Phone", alumnus.phone],
+                    ["Department", alumnus.department],
+                    ["Graduation year", alumnus.graduationYear],
+                    ["Company", alumnus.company],
+                    ["Job role", alumnus.jobRole],
+                    ["Skills", alumnus.skills]
+                ].forEach(([label, value]) => {
+                    const paragraph = document.createElement("p");
+                    const strong = document.createElement("strong");
+                    strong.textContent = `${label}: `;
+                    paragraph.appendChild(strong);
+                    paragraph.appendChild(document.createTextNode(value || "Not provided"));
+                    details.appendChild(paragraph);
+                });
+                populateProfileForm(alumnus);
+                document.getElementById("profileEditButton").disabled = false;
+                return true;
+            } catch (error) {
+                console.error("Alumni profile loading error:", error);
+                details.textContent = error.message;
+                return false;
+            }
+        }
+
+        function populateProfileForm(alumnus) {
+            document.getElementById("profileAlumniId").value = alumnus.alumniId;
+            document.getElementById("profileEmail").value = alumnus.email;
+            document.getElementById("profileDepartment").value = alumnus.department || "";
+            document.getElementById("profileGraduationYear").value =
+                alumnus.graduationYear ?? "";
+            document.getElementById("profilePhone").value = alumnus.phone || "";
+            document.getElementById("profileCompany").value = alumnus.company || "";
+            document.getElementById("profileJobRole").value = alumnus.jobRole || "";
+            document.getElementById("profileSkills").value = alumnus.skills || "";
+        }
+
+        const profileEditButton = document.getElementById("profileEditButton");
+        const profileDetails = document.getElementById("profileDetails");
+        const profileEditForm = document.getElementById("profileEditForm");
+        const profileEditMessage = document.getElementById("profileEditMessage");
+        const profileCancelButton = document.getElementById("profileCancelButton");
+
+        profileEditButton.addEventListener("click", () => {
+            if (!currentAlumniProfile) {
+                return;
+            }
+            populateProfileForm(currentAlumniProfile);
+            profileEditMessage.textContent = "";
+            profileDetails.hidden = true;
+            profileEditButton.hidden = true;
+            profileEditForm.hidden = false;
+            document.getElementById("profilePhone").focus();
+        });
+
+        profileCancelButton.addEventListener("click", () => {
+            profileEditForm.reset();
+            profileEditMessage.textContent = "";
+            profileEditForm.hidden = true;
+            profileDetails.hidden = false;
+            profileEditButton.hidden = false;
+        });
+
+        profileEditForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            profileEditMessage.textContent = "";
+            const saveButton = profileEditForm.querySelector('button[type="submit"]');
+            saveButton.disabled = true;
+            profileCancelButton.disabled = true;
+
+            try {
+                const result = await apiFetch("/alumni/me", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        phone: document.getElementById("profilePhone").value,
+                        company: document.getElementById("profileCompany").value,
+                        jobRole: document.getElementById("profileJobRole").value,
+                        skills: document.getElementById("profileSkills").value
+                    })
+                });
+                profileEditForm.hidden = true;
+                profileDetails.hidden = false;
+                profileEditButton.hidden = false;
+                await loadProfile();
+                document.getElementById("dashboardStatus").textContent = result.message;
+            } catch (error) {
+                console.error("Alumni profile update error:", error);
+                profileEditMessage.textContent = error.message;
+            } finally {
+                saveButton.disabled = false;
+                profileCancelButton.disabled = false;
+            }
+        });
+
+        function addTextDetail(card, label, value) {
+            const paragraph = document.createElement("p");
+            const strong = document.createElement("strong");
+            strong.textContent = `${label}: `;
+            paragraph.appendChild(strong);
+            paragraph.appendChild(document.createTextNode(value || "Not provided"));
+            card.appendChild(paragraph);
+        }
+
+        async function updateRequestStatus(requestId, status, card) {
+            const buttons = card.querySelectorAll(".request-actions button");
+            buttons.forEach(button => { button.disabled = true; });
+            try {
+                const result = await apiFetch(
+                    `/alumni/mentorship-requests/${encodeURIComponent(requestId)}/status`,
+                    {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status })
+                    }
+                );
+                document.getElementById("dashboardStatus").textContent = result.message;
+                await loadRequests();
+            } catch (error) {
+                console.error("Request status update error:", error);
+                document.getElementById("dashboardStatus").textContent = error.message;
+                buttons.forEach(button => { button.disabled = false; });
+            }
+        }
+
+        async function sendReply(requestId, form, feedback) {
+            const textarea = form.querySelector("textarea");
+            const message = textarea.value.trim();
+            if (!message || message.length > 2000) {
+                feedback.textContent = "Enter a reply of 1 to 2000 characters.";
+                return;
+            }
+
+            const button = form.querySelector("button");
+            button.disabled = true;
+            try {
+                const result = await apiFetch(
+                    `/alumni/mentorship-requests/${encodeURIComponent(requestId)}/replies`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ message })
+                    }
+                );
+                form.reset();
+                feedback.textContent = result.message;
+            } catch (error) {
+                console.error("Mentorship reply error:", error);
+                feedback.textContent = error.message;
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function renderRequest(request) {
+            const card = document.createElement("article");
+            card.className = "request-card";
+
+            const heading = document.createElement("h3");
+            heading.textContent = `Request #${request.requestId} — ${request.student.name}`;
+            card.appendChild(heading);
+            addTextDetail(card, "Department", request.student.department);
+            addTextDetail(card, "Year", request.student.year);
+            addTextDetail(card, "Career interests", request.student.careerInterests);
+            addTextDetail(card, "Request date", request.requestDate
+                ? new Date(request.requestDate).toLocaleString()
+                : null);
+            addTextDetail(card, "Description", request.description);
+            addTextDetail(card, "Status", request.status);
+
+            if (request.status === "Pending") {
+                const actions = document.createElement("div");
+                actions.className = "request-actions";
+
+                [["Accepted", "Accept", ""], ["Rejected", "Reject", "reject-button"]]
+                    .forEach(([status, label, className]) => {
+                        const button = document.createElement("button");
+                        button.type = "button";
+                        button.textContent = label;
+                        button.className = className;
+                        button.addEventListener("click", () => {
+                            updateRequestStatus(request.requestId, status, card);
+                        });
+                        actions.appendChild(button);
+                    });
+                card.appendChild(actions);
+            }
+
+            const form = document.createElement("form");
+            form.className = "reply-form";
+            const label = document.createElement("label");
+            label.textContent = "Reply to student";
+            const textarea = document.createElement("textarea");
+            textarea.maxLength = 2000;
+            textarea.required = true;
+            textarea.placeholder = "Write a helpful reply (up to 2000 characters).";
+            label.appendChild(textarea);
+            const button = document.createElement("button");
+            button.type = "submit";
+            button.textContent = "Send Reply";
+            const feedback = document.createElement("p");
+            feedback.setAttribute("role", "status");
+            form.append(label, button, feedback);
+            form.addEventListener("submit", event => {
+                event.preventDefault();
+                sendReply(request.requestId, form, feedback);
+            });
+            card.appendChild(form);
+            return card;
+        }
+
+        async function loadRequests() {
+            const status = document.getElementById("dashboardStatus");
+            const containers = {
+                Pending: document.getElementById("pendingRequests"),
+                Accepted: document.getElementById("acceptedRequests"),
+                Rejected: document.getElementById("rejectedRequests")
+            };
+
+            try {
+                const result = await apiFetch("/alumni/mentorship-requests");
+                Object.values(containers).forEach(container => container.replaceChildren());
+                Object.entries(containers).forEach(([requestStatus, container]) => {
+                    const matching = result.requests.filter(request => request.status === requestStatus);
+                    if (!matching.length) {
+                        const empty = document.createElement("p");
+                        empty.className = "empty-state";
+                        empty.textContent = `No ${requestStatus.toLowerCase()} requests.`;
+                        container.appendChild(empty);
+                        return;
+                    }
+                    matching.forEach(request => container.appendChild(renderRequest(request)));
+                });
+                status.textContent = `${result.count} mentorship request${result.count === 1 ? "" : "s"} loaded.`;
+            } catch (error) {
+                console.error("Alumni request loading error:", error);
+                status.textContent = error.message;
+                Object.values(containers).forEach(container => {
+                    container.textContent = "Unable to load requests.";
+                });
+            }
+        }
+
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            try {
+                await fetch(`${API_BASE}/alumni/logout`, {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${alumniSession.token}` }
+                });
+            } catch (error) {
+                console.error("Alumni logout error:", error);
+            } finally {
+                sessionStorage.removeItem("alumniConnectAlumni");
+                window.location.replace("alumni-login.html");
+            }
+        });
+    </script>
+</body>
+</html>

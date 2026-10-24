@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mentorship Requests | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .requests-page {
+            width: calc(100% - 32px);
+            max-width: 1050px;
+            margin: 40px auto;
+        }
+
+        .requests-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .requests-header p {
+            margin-top: 8px;
+            color: var(--muted);
+        }
+
+        .request-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .request-card {
+            padding: 22px;
+            background: var(--white);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+            overflow-wrap: anywhere;
+        }
+
+        .request-card h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .request-card p {
+            margin-top: 8px;
+            color: #475569;
+            white-space: pre-wrap;
+        }
+
+        .request-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-accepted {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        #requestsStatus {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .back-button {
+            display: block;
+            width: fit-content;
+            margin: 28px auto;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <main class="requests-page">
+        <header class="requests-header">
+            <h1>My Mentorship Requests</h1>
+            <p>Review the alumni you contacted and the status of each request.</p>
+        </header>
+        <p id="requestsStatus" role="status" aria-live="polite">Loading your requests...</p>
+        <section id="requestList" class="request-list" aria-label="Mentorship requests"></section>
+        <a class="back-button" href="dashboard.html">Back to Dashboard</a>
+    </main>
+
+    <script>
+        const sessionText = sessionStorage.getItem("alumniConnectStudent");
+        let studentSession;
+        try {
+            studentSession = JSON.parse(sessionText || "null");
+        } catch (error) {
+            studentSession = null;
+        }
+
+        if (!studentSession?.token || !studentSession.studentId) {
+            sessionStorage.removeItem("alumniConnectStudent");
+            window.location.replace("login.html");
+        } else {
+            loadRequests();
+        }
+
+        async function loadRequests() {
+            const statusMessage = document.getElementById("requestsStatus");
+            const requestList = document.getElementById("requestList");
+            try {
+                const response = await fetch(
+                    `http://localhost:5000/api/students/${encodeURIComponent(studentSession.studentId)}/requests`,
+                    {
+                        headers: {
+                            "Authorization": `Bearer ${studentSession.token}`
+                        }
+                    }
+                );
+                const result = await response.json();
+
+                if (response.status === 401) {
+                    sessionStorage.removeItem("alumniConnectStudent");
+                    window.location.replace("login.html");
+                    return;
+                }
+                if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Unable to load requests.");
+                }
+
+                if (!result.requests.length) {
+                    statusMessage.textContent = "You have not sent any mentorship requests yet.";
+                    return;
+                }
+
+                statusMessage.textContent = `${result.count} request${result.count === 1 ? "" : "s"}`;
+                result.requests.forEach(request => {
+                    const card = document.createElement("article");
+                    card.className = "request-card";
+
+                    const heading = document.createElement("h2");
+                    heading.textContent = `Request #${request.requestId} — ${request.alumniName || "Alumnus"}`;
+                    card.appendChild(heading);
+
+                    const status = document.createElement("span");
+                    const statusName = ["Pending", "Accepted", "Rejected"].includes(request.status)
+                        ? request.status
+                        : "Unknown";
+                    status.className = `request-status status-${statusName.toLowerCase()}`;
+                    status.textContent = `Status: ${statusName}`;
+                    card.appendChild(status);
+
+                    const details = [
+                        ["Company", request.company],
+                        ["Request date", request.requestDate
+                            ? new Date(request.requestDate).toLocaleString()
+                            : "Not available"],
+                        ["Description", request.description]
+                    ];
+
+                    details.forEach(([label, value]) => {
+                        const paragraph = document.createElement("p");
+                        const strong = document.createElement("strong");
+                        strong.textContent = `${label}: `;
+                        paragraph.appendChild(strong);
+                        paragraph.appendChild(document.createTextNode(
+                            value === null || value === undefined || value === ""
+                                ? "Not provided"
+                                : String(value)
+                        ));
+                        card.appendChild(paragraph);
+                    });
+
+                    const repliesHeading = document.createElement("h3");
+                    repliesHeading.textContent = "Replies from alumni";
+                    card.appendChild(repliesHeading);
+
+                    if (!request.replies || request.replies.length === 0) {
+                        const noReplies = document.createElement("p");
+                        noReplies.textContent = "No replies yet.";
+                        card.appendChild(noReplies);
+                    } else {
+                        request.replies.forEach(reply => {
+                            const replyParagraph = document.createElement("p");
+                            const replyDate = reply.createdAt
+                                ? new Date(reply.createdAt).toLocaleString()
+                                : "Date unavailable";
+                            const sender = reply.alumniName
+                                ? `Reply from ${reply.alumniName}${reply.company ? ` (${reply.company})` : ""}`
+                                : "Alumni reply";
+                            replyParagraph.textContent =
+                                `${sender} — ${replyDate}: ${reply.message || "No message provided."}`;
+                            card.appendChild(replyParagraph);
+                        });
+                    }
+
+                    requestList.appendChild(card);
+                });
+            } catch (error) {
+                console.error("Request loading error:", error);
+                statusMessage.textContent = error instanceof TypeError
+                    ? "Could not connect to the backend. Please try again."
+                    : error.message;
+            }
+        }
+    </script>
+</body>
+</html>

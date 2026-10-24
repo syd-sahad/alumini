@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Find Alumni | AlumniConnect</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .alumni-page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .alumni-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin: 25px auto;
+            max-width: 700px;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-box button,
+        .back-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .alumni-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .alumni-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 22px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow-wrap: anywhere;
+        }
+
+        .alumni-card h3 {
+            margin-top: 0;
+            color: #0f172a;
+        }
+
+        .alumni-card p {
+            color: #475569;
+            line-height: 1.6;
+        }
+
+        .status-message {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 480px) {
+            .search-box {
+                flex-direction: column;
+            }
+
+            .search-box button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="alumni-page">
+
+        <header class="alumni-header">
+            <h1>Find Alumni</h1>
+            <p>Discover alumni, explore their careers, and find professional connections.</p>
+        </header>
+
+        <form class="search-box" id="searchForm">
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search name, department, company, job role or skill..."
+                aria-label="Search alumni"
+            >
+
+            <button type="submit">Search</button>
+        </form>
+
+        <p id="statusMessage" class="status-message" role="status">
+            Loading alumni...
+        </p>
+
+        <section id="alumniGrid" class="alumni-grid"></section>
+
+        <p style="text-align:center; margin-top:30px;">
+            <a class="back-button" href="dashboard.html">Back to Dashboard</a>
+        </p>
+
+    </main>
+
+    <script>
+        const API_URL = "http://localhost:5000/api/alumni";
+
+        const searchForm = document.getElementById("searchForm");
+        const searchInput = document.getElementById("searchInput");
+        const alumniGrid = document.getElementById("alumniGrid");
+        const statusMessage = document.getElementById("statusMessage");
+
+        async function loadAlumni(search = "") {
+            statusMessage.textContent = "Loading alumni...";
+            alumniGrid.replaceChildren();
+
+            try {
+                const url = new URL(API_URL);
+                url.searchParams.set("search", search);
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "Unable to load alumni.");
+                }
+
+                if (data.alumni.length === 0) {
+                    statusMessage.textContent =
+                        "No alumni found. Add alumni records in MySQL Workbench first.";
+                    return;
+                }
+
+                statusMessage.textContent =
+                    `${data.count} alumni found`;
+
+                data.alumni.forEach(person => {
+                    const card = document.createElement("article");
+                    card.className = "alumni-card";
+
+                    const heading = document.createElement("h3");
+                    heading.textContent = person.name || "Name unavailable";
+                    card.appendChild(heading);
+
+                    const details = [
+                        ["Department", person.department],
+                        ["Graduation Year", person.graduationYear],
+                        ["Company", person.company],
+                        ["Job Role", person.jobRole],
+                        ["Skills", person.skills]
+                    ];
+
+                    details.forEach(([label, value]) => {
+                        const paragraph = document.createElement("p");
+                        const strong = document.createElement("strong");
+
+                        strong.textContent = `${label}: `;
+                        paragraph.appendChild(strong);
+                        paragraph.appendChild(
+                            document.createTextNode(
+                                value === null || value === undefined || value === ""
+                                    ? "Not provided"
+                                    : String(value)
+                            )
+                        );
+
+                        card.appendChild(paragraph);
+                    });
+
+                    alumniGrid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Alumni loading error:", error);
+
+                statusMessage.textContent =
+                    "Could not connect to the backend. Make sure it is running on port 5000.";
+            }
+        }
+
+        searchForm.addEventListener("submit", event => {
+            event.preventDefault();
+            loadAlumni(searchInput.value.trim());
+        });
+
+        window.addEventListener("pagehide", () => {
+            searchForm.reset();
+        });
+
+        window.addEventListener("pageshow", event => {
+            if (event.persisted) {
+                searchForm.reset();
+                loadAlumni();
+            }
+        });
+
+        loadAlumni();
+    </script>
+
+</body>
+</html>
