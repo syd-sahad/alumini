@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#eff6ff">
+    <title>Admin Login | AlumniConnect</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="alumni-login-page admin-login-page">
+    <main class="alumni-login-shell">
+        <a class="alumni-login-brand" href="index.html" aria-label="AlumniConnect home">
+            <span class="alumni-login-brand-mark" aria-hidden="true">AC</span>
+            <span>Alumni<span class="alumni-login-brand-accent">Connect</span></span>
+        </a>
+
+        <section class="alumni-login-card" aria-labelledby="adminLoginTitle">
+            <p class="alumni-login-eyebrow">ADMINISTRATOR PORTAL</p>
+            <h1 id="adminLoginTitle">Admin sign in</h1>
+            <p class="alumni-login-intro">
+                Sign in with your institution name and administrator password.
+            </p>
+
+            <form id="adminLoginForm" novalidate>
+                <div class="alumni-login-field">
+                    <label for="institutionName">Institution name</label>
+                    <input
+                        id="institutionName"
+                        name="institutionName"
+                        type="text"
+                        maxlength="100"
+                        autocomplete="organization"
+                        placeholder="Enter your institution name"
+                        required
+                    >
+                </div>
+
+                <div class="alumni-login-field">
+                    <label for="adminPassword">Password</label>
+                    <div class="alumni-login-password">
+                        <input
+                            id="adminPassword"
+                            name="password"
+                            type="password"
+                            maxlength="255"
+                            autocomplete="current-password"
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <button
+                            id="adminPasswordToggle"
+                            class="alumni-login-password-toggle"
+                            type="button"
+                            aria-controls="adminPassword"
+                            aria-pressed="false"
+                        >Show</button>
+                    </div>
+                </div>
+
+                <button class="alumni-login-submit" type="submit">Sign in</button>
+                <p
+                    id="adminLoginMessage"
+                    class="alumni-login-message"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                ></p>
+            </form>
+
+            <nav class="alumni-login-links" aria-label="Other pages">
+                <a href="login.html">Student Login</a>
+                <a href="alumni-login.html">Alumni Login</a>
+                <a href="index.html">Home</a>
+            </nav>
+        </section>
+
+        <p class="alumni-login-footer">AlumniConnect institution administration.</p>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

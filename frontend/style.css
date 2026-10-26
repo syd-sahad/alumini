@@ -691,6 +691,11 @@ a {
     gap: 19px;
 }
 
+#adminLoginForm {
+    display: grid;
+    gap: 19px;
+}
+
 .alumni-login-field {
     display: grid;
     gap: 8px;
@@ -832,6 +837,31 @@ a {
     color: #64748b;
     font-size: 12px;
     text-align: center;
+}
+
+.admin-login-page {
+    background:
+        radial-gradient(ellipse at 10% 10%, rgba(191, 219, 254, 0.7), transparent 38%),
+        radial-gradient(ellipse at 90% 90%, rgba(219, 234, 254, 0.75), transparent 35%),
+        #f8fbff;
+}
+
+.admin-login-page .alumni-login-brand-mark {
+    background: #173b73;
+    box-shadow: 0 6px 14px rgba(23, 59, 115, 0.2);
+}
+
+.admin-login-page .alumni-login-eyebrow {
+    color: #173b73;
+}
+
+.admin-login-page .alumni-login-submit {
+    background: #173b73;
+    box-shadow: 0 7px 14px rgba(23, 59, 115, 0.18);
+}
+
+.admin-login-page .alumni-login-submit:hover {
+    background: #102b55;
 }
 
 @media (max-width: 520px) {

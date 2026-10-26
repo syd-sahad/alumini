@@ -242,6 +242,147 @@ if (loginForm) {
 }
 
 // ===============================
+// ALUMNICCONNECT - ADMIN LOGIN
+// ===============================
+
+const adminLoginForm = document.getElementById("adminLoginForm");
+
+if (adminLoginForm) {
+    clearFormOnNavigation(adminLoginForm, "Sign in");
+
+    const institutionNameInput = document.getElementById("institutionName");
+    const adminPasswordInput = document.getElementById("adminPassword");
+    const passwordToggle = document.getElementById("adminPasswordToggle");
+    const adminLoginMessage = document.getElementById("adminLoginMessage");
+    const submitButton = adminLoginForm.querySelector('button[type="submit"]');
+
+    function setAdminLoginMessage(text, type) {
+        adminLoginMessage.textContent = text;
+        adminLoginMessage.className = `alumni-login-message is-${type}`;
+    }
+
+    let isAdminPasswordVisible = false;
+
+    function resetAdminPasswordVisibility() {
+        isAdminPasswordVisible = false;
+        adminPasswordInput.type = "password";
+        passwordToggle.textContent = "Show";
+        passwordToggle.setAttribute("aria-pressed", "false");
+    }
+
+    resetAdminPasswordVisibility();
+    passwordToggle.onclick = function () {
+        isAdminPasswordVisible = !isAdminPasswordVisible;
+        adminPasswordInput.type = isAdminPasswordVisible ? "text" : "password";
+        passwordToggle.textContent = isAdminPasswordVisible ? "Hide" : "Show";
+        passwordToggle.setAttribute("aria-pressed", String(isAdminPasswordVisible));
+    };
+
+    window.addEventListener("pagehide", resetAdminPasswordVisibility);
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted) {
+            resetAdminPasswordVisibility();
+            adminLoginMessage.className = "alumni-login-message";
+        }
+    });
+
+    adminLoginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        adminLoginMessage.className = "alumni-login-message";
+        adminLoginMessage.textContent = "";
+
+        const institutionName = institutionNameInput.value.trim();
+        const password = adminPasswordInput.value;
+
+        if (!institutionName) {
+            setAdminLoginMessage("Enter your institution name.", "error");
+            institutionNameInput.focus();
+            return;
+        }
+
+        if (!password || password.length > 255) {
+            setAdminLoginMessage("Enter a valid password.", "error");
+            adminPasswordInput.focus();
+            return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Signing in...";
+
+        try {
+            const response = await fetch("http://localhost:5000/api/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ institutionName, password })
+            });
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (error) {
+                console.error("Admin login response parsing error:", error);
+                setAdminLoginMessage(
+                    response.ok
+                        ? "The backend returned an invalid response."
+                        : `The server returned HTTP ${response.status} with an unreadable response.`,
+                    "error"
+                );
+                return;
+            }
+
+            if (!response.ok || !result || result.success !== true) {
+                setAdminLoginMessage(
+                    typeof result?.message === "string"
+                        ? result.message
+                        : `Login failed with HTTP ${response.status}.`,
+                    "error"
+                );
+                return;
+            }
+
+            if (!result.token || !result.adminId) {
+                setAdminLoginMessage(
+                    "The backend response is missing administrator session details.",
+                    "error"
+                );
+                return;
+            }
+
+            try {
+                sessionStorage.setItem("alumniConnectAdmin", JSON.stringify({
+                    adminId: result.adminId,
+                    institutionName: result.institutionName,
+                    token: result.token
+                }));
+            } catch (error) {
+                console.error("Admin session storage error:", error);
+                setAdminLoginMessage(
+                    "Login succeeded, but this browser could not save the session.",
+                    "error"
+                );
+                return;
+            }
+
+            adminPasswordInput.value = "";
+            setAdminLoginMessage("Admin sign in successful.", "success");
+        } catch (error) {
+            console.error("Admin login request error:", error);
+            setAdminLoginMessage(
+                error instanceof TypeError
+                    ? "Could not connect to the backend. Please check that the server is running."
+                    : "Unable to complete admin login. Please try again.",
+                "error"
+            );
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Sign in";
+        }
+    });
+}
+
+// ===============================
 // ALUMNICCONNECT - ALUMNI LOGIN
 // ===============================
 

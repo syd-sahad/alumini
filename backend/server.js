@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const studentSessions = new Map();
 const alumniSessions = new Map();
+const adminSessions = new Map();
 const STUDENT_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 app.use(cors());
@@ -72,6 +73,29 @@ function requireAlumniAuthentication(req, res, next) {
 
     req.alumniId = session.alumniId;
     req.alumniSessionToken = token;
+    return next();
+}
+
+function requireAdminAuthentication(req, res, next) {
+    const authorization = req.get("authorization") || "";
+    const token = authorization.startsWith("Bearer ")
+        ? authorization.slice(7)
+        : "";
+    const session = adminSessions.get(token);
+
+    if (!session || session.expiresAt <= Date.now()) {
+        if (session) {
+            adminSessions.delete(token);
+        }
+
+        return res.status(401).json({
+            success: false,
+            message: "Please log in with an administrator account to continue."
+        });
+    }
+
+    req.adminId = session.adminId;
+    req.adminSessionToken = token;
     return next();
 }
 
@@ -495,6 +519,94 @@ app.post("/api/alumni/login", async (req, res) => {
 
 app.post("/api/alumni/logout", requireAlumniAuthentication, (req, res) => {
     alumniSessions.delete(req.alumniSessionToken);
+    return res.json({
+        success: true,
+        message: "You have been logged out."
+    });
+});
+
+app.post("/api/admin/login", async (req, res) => {
+    try {
+        const institutionName = req.body?.institutionName;
+        const password = req.body?.password;
+
+        if (
+            typeof institutionName !== "string" ||
+            institutionName.trim().length === 0 ||
+            institutionName.trim().length > 100 ||
+            typeof password !== "string" ||
+            password.length === 0 ||
+            password.length > 255
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Enter a valid institution name and password."
+            });
+        }
+
+        const [adminRows] = await db.execute(
+            `SELECT Admin_ID, Name, Password
+             FROM admin
+             WHERE Name = ?
+             LIMIT 1`,
+            [institutionName.trim()]
+        );
+
+        const admin = adminRows[0];
+        if (
+            !admin ||
+            typeof admin.Password !== "string" ||
+            !admin.Password
+        ) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid institution name or password."
+            });
+        }
+
+        const passwordMatches = await bcrypt.compare(password, admin.Password);
+        if (!passwordMatches) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid institution name or password."
+            });
+        }
+
+        const now = Date.now();
+        removeExpiredSessions(adminSessions, now);
+
+        const token = crypto.randomBytes(32).toString("hex");
+        adminSessions.set(token, {
+            adminId: admin.Admin_ID,
+            expiresAt: now + STUDENT_SESSION_TTL_MS
+        });
+
+        return res.json({
+            success: true,
+            message: "Admin login successful.",
+            adminId: admin.Admin_ID,
+            institutionName: admin.Name,
+            token
+        });
+    } catch (error) {
+        console.error("Admin login error:", error.message);
+
+        if (error.code === "ER_BAD_FIELD_ERROR") {
+            return res.status(503).json({
+                success: false,
+                message: "Admin login is not configured. Check the admin table schema."
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Admin login failed. Please try again."
+        });
+    }
+});
+
+app.post("/api/admin/logout", requireAdminAuthentication, (req, res) => {
+    adminSessions.delete(req.adminSessionToken);
     return res.json({
         success: true,
         message: "You have been logged out."
